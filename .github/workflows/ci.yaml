@@ -1,0 +1,23 @@
+name: definition-blackboard-database-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Helm lint
+        run: |
+          helm lint ops/helm \
+            -f ops/helm/environments/preprod/values.yaml \
+            --set-string secrets.DB_PASSWORD=dummy
+      - name: Validate chart
+        run: |
+          helm template test ops/helm \
+            -f ops/helm/environments/preprod/values.yaml \
+            --set-string secrets.DB_PASSWORD=dummy > /dev/null

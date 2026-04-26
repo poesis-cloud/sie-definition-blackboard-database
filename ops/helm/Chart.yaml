@@ -1,0 +1,6 @@
+apiVersion: v2
+name: sie-definition-blackboard-database
+description: PostgreSQL for the SIE Definition Blackboard Manager (DBM) substrate store
+type: application
+version: 0.1.0
+appVersion: "16.3"

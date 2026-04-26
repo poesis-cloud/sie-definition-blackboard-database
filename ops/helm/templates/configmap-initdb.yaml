@@ -1,0 +1,27 @@
+{{- $defFiles := .Files.Glob "def/*.sql" -}}
+{{- $hasDef := gt (len $defFiles) 0 -}}
+{{- $hasExt := gt (len .Values.postgres.extensions) 0 -}}
+{{- $hasExtra := gt (len .Values.initdb.extraScripts) 0 -}}
+{{- if and .Values.initdb.enabled (or $hasDef $hasExt $hasExtra) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sie-definition-blackboard-database.fullname" . }}-initdb
+  labels:
+    {{- include "sie-definition-blackboard-database.labels" . | nindent 4 }}
+data:
+  {{- if $hasExt }}
+  000_extensions.sql: |-
+    {{- range $ext := .Values.postgres.extensions }}
+    CREATE EXTENSION IF NOT EXISTS "{{ $ext }}";
+    {{- end }}
+  {{- end }}
+  {{- range $path, $file := $defFiles }}
+  {{ base $path }}: |-
+{{ $file | toString | indent 4 }}
+  {{- end }}
+  {{- range $name, $script := .Values.initdb.extraScripts }}
+  {{ $name }}: |-
+{{ $script | indent 4 }}
+  {{- end }}
+{{- end }}
